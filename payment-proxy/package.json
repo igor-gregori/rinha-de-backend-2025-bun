@@ -1,0 +1,15 @@
+{
+  "name": "payment-proxy",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun src/http-server.ts",
+    "dev": "bun --watch src/http-server.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
