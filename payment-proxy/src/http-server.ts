@@ -2,7 +2,9 @@ import { type BunRequest } from "bun";
 
 const worker = new Worker(new URL("worker.ts", import.meta.url).href);
 
-console.log("Worker started");
+worker.addEventListener("open", () => {
+  console.log("Worker is ready");
+});
 
 Bun.serve({
   port: 3000,
@@ -11,7 +13,7 @@ Bun.serve({
     "/payments": {
       POST: async (req: BunRequest) => {
         const paymentRequest = await req.json();
-        worker.postMessage({ type: "insert", payload: paymentRequest });
+        worker.postMessage({ type: "paymentRequest", payload: paymentRequest });
         return Response.json("Ok", { status: 201 });
       },
     },

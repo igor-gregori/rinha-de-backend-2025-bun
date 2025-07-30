@@ -5,8 +5,11 @@ services:
     hostname: payment-proxy-pao
     networks:
       - backend
+      - payment-processor
     environment:
-      - WATCH_FILES=${WATCH_FILES:-0}
+      - PAYMENT_PROCESSOR_URL_DEFAULT=http://payment-processor-default:8080
+      - PAYMENT_PROCESSOR_URL_FALLBACK=http://payment-processor-fallback:8080
+      - INSTANCE_TYPE=PRIMARY
     ports:
       - "3001:3000"
     deploy:
@@ -18,3 +21,5 @@ services:
 networks:
   backend:
     driver: bridge
+  payment-processor:
+    external: true
