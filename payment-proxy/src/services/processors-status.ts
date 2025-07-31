@@ -1,38 +1,33 @@
-import { db } from "../db";
+import type { ProcessorsStatus } from "../shared/types";
 
-export async function checkProcessorsStatus(): Promise<void> {
+export async function checkProcessorsStatus(): Promise<ProcessorsStatus> {
   const [defaultResponse, fallbackResponse] = await Promise.allSettled([
     fetch(`${process.env.PAYMENT_PROCESSOR_URL_DEFAULT}/payments/service-health`),
     fetch(`${process.env.PAYMENT_PROCESSOR_URL_FALLBACK}/payments/service-health`),
   ]);
 
-  let defaultFailing = true;
-  let defaultMinResponseTime = 0;
-  let fallbackFailing = true;
-  let fallbackMinResponseTime = 0;
+  const processorsStatus = {
+    default: {
+      failing: false,
+      minResponseTime: 0,
+    },
+    fallback: {
+      failing: false,
+      minResponseTime: 0,
+    },
+  };
 
   if (defaultResponse.status === "fulfilled" && defaultResponse.value.ok) {
     const body = (await defaultResponse.value.json()) as { failing: boolean; minResponseTime: number };
-    defaultFailing = body.failing;
-    defaultMinResponseTime = body.minResponseTime ?? 0;
+    processorsStatus.default.failing = body.failing;
+    processorsStatus.default.minResponseTime = body.minResponseTime;
   }
 
   if (fallbackResponse.status === "fulfilled" && fallbackResponse.value.ok) {
     const body = (await fallbackResponse.value.json()) as { failing: boolean; minResponseTime: number };
-    fallbackFailing = body.failing;
-    fallbackMinResponseTime = body.minResponseTime ?? 0;
+    processorsStatus.fallback.failing = body.failing;
+    processorsStatus.fallback.minResponseTime = body.minResponseTime;
   }
 
-  const updateServiceStatusSql = db.prepare(
-    "UPDATE serviceStatus SET defaultFailing = $defaultFailing, defaultMinResponseTime = $defaultMinResponseTime, fallbackFailing = $fallbackFailing, fallbackMinResponseTime = $fallbackMinResponseTime WHERE id = 1"
-  );
-
-  updateServiceStatusSql.run({
-    $defaultFailing: defaultFailing,
-    $defaultMinResponseTime: defaultMinResponseTime,
-    $fallbackFailing: fallbackFailing,
-    $fallbackMinResponseTime: fallbackMinResponseTime,
-  });
-
-  console.info("Services health status updated");
+  return processorsStatus;
 }

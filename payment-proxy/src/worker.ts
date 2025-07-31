@@ -1,24 +1,31 @@
 declare var self: Worker;
 
-import "./db";
+import type { MessagePayload, MessageType, Payment, ProcessedPayment, ProcessorsStatus } from "./shared/types";
 
-import type { Payment } from "./types";
-import { insertPayment, getPaymentsSummary } from "./services/payments";
-import { checkProcessorsStatus } from "./services/processors-status";
+let processorsStatus = {
+  default: {
+    failing: false,
+    minResponseTime: 0,
+  },
+  fallback: {
+    failing: false,
+    minResponseTime: 0,
+  },
+};
 
 const paymentBuffer: Payment[] = [];
-const BATCH_SIZE = 10;
-const BATCH_INTERVAL_MS = 100;
-const HEALTH_CHECK_INTERVAL_MS = 5000;
+const processedPayments: ProcessedPayment[] = [];
 
-self.onmessage = (event: MessageEvent<{ type: string; payload?: Payment | unknown }>) => {
+self.onmessage = (event: MessageEvent<{ type: MessageType; payload?: MessagePayload }>) => {
   try {
-    if (event.data.type === "payment-request") {
+    if (event.data.type === "CREATE-PAYMENT-REQUEST") {
       const paymentRequest = event.data.payload as Payment;
       paymentBuffer.push(paymentRequest);
-    } else if (event.data.type === "summary") {
-      const result = getPaymentsSummary();
-      self.postMessage({ type: "summary", payload: result });
+    } else if (event.data.type === "GET-PAYMENT-SUMMARY") {
+      // const result = getPaymentsSummary();
+      self.postMessage({ type: "summary", payload: null });
+    } else if (event.data.type === "UPDATE-PROCESSORS-STATUS") {
+      processorsStatus = event.data.payload as ProcessorsStatus;
     }
   } catch (err) {
     console.error("Worker error:", err);
@@ -32,19 +39,18 @@ async function processBatch(): Promise<void> {
       return;
     }
 
-    const batch = paymentBuffer.splice(0, BATCH_SIZE);
-    await Promise.all(batch.map(insertPayment));
-    console.info(`Processados ${batch.length} pagamentos`);
+    let processorToUse = getProcessorToUse();
+
+    const batch = paymentBuffer.splice(0, 10);
+    // await Promise.all(batch.map(insertPayment));
+    // console.info(`Processados ${batch.length} pagamentos`);
   } catch (err) {
     console.log("Process batch error:", err);
   }
 }
 
-// setInterval(processBatch, BATCH_INTERVAL_MS);
+setInterval(processBatch, 1500);
 
-if (Bun.env.INSTANCE_TYPE === "PRIMARY") {
-  setInterval(checkProcessorsStatus, HEALTH_CHECK_INTERVAL_MS);
-  console.info("This instance is primary, service health check started");
-} else {
-  console.info("This instance is not primary, service health check not started");
+async function getProcessorToUse(): Promise<"DEFAULT" | "FALLBACK"> {
+  // Implementar aqui, anotações no notepad
 }
