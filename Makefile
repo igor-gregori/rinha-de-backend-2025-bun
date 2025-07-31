@@ -14,7 +14,7 @@ down:
 	docker compose down
 
 login:
-	docker compose run -w /app payment-proxy-pao /bin/bash
+	docker compose run -w /app payment-proxy /bin/bash
 
 rebuild:
 	docker compose down && docker compose build --no-cache && docker compose up -d

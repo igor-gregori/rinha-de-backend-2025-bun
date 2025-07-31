@@ -1,15 +1,15 @@
 services:
-  payment-proxy-pao:
+  payment-proxy:
     build:
       context: ./payment-proxy
-    hostname: payment-proxy-pao
+    hostname: payment-proxy
     networks:
       - backend
       - payment-processor
     environment:
       - PAYMENT_PROCESSOR_URL_DEFAULT=http://payment-processor-default:8080
       - PAYMENT_PROCESSOR_URL_FALLBACK=http://payment-processor-fallback:8080
-      - INSTANCE_TYPE=PRIMARY
+      - INSTANCE_TYPE
     ports:
       - "3001:3000"
     deploy:

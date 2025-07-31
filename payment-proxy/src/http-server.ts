@@ -17,24 +17,29 @@ Bun.serve({
       POST: async (req: BunRequest) => {
         const paymentRequest = await req.json();
         worker.postMessage({ type: "CREATE-PAYMENT-REQUEST", payload: paymentRequest });
-        return Response.json(null, { status: 201 });
+        return new Response(null, { status: 201 });
       },
     },
     "/payments-summary": {
       GET: async (req: BunRequest) => {
+        const url = new URL(req.url);
+        const fromStr = url.searchParams.get("from") as string;
+        const toStr = url.searchParams.get("to") as string;
+        const from = Date.parse(fromStr);
+        const to = Date.parse(toStr);
         return new Promise<Response>((resolve) => {
-          worker.onmessage = (event: MessageEvent) => {
-            if (event.data.type === "GET-PAYMENT-SUMMARY") {
+          const messageHandler = (event: MessageEvent) => {
+            if (event.data.type === "GET-PAYMENT-SUMMARY-OUT") {
+              worker.removeEventListener("message", messageHandler);
               resolve(Response.json(event.data.payload, { status: 200 }));
             }
           };
-          worker.postMessage({ type: "summary" });
+          worker.addEventListener("message", messageHandler);
+          worker.postMessage({
+            type: "GET-PAYMENT-SUMMARY-IN",
+            payload: { from, to },
+          });
         });
-      },
-    },
-    "/processors-status": {
-      GET: async () => {
-        return Response.json(processorsStatus, { status: 200 });
       },
     },
   },
@@ -60,13 +65,9 @@ let processorsStatus = {
 async function updateProcessorsStatus() {
   processorsStatus = await checkProcessorsStatus();
   worker.postMessage({ type: "UPDATE-PROCESSORS-STATUS", payload: processorsStatus });
+  // Envio pro follower
   console.info("Processors status updated");
 }
 
-if (Bun.env.INSTANCE_TYPE === "PRIMARY") {
-  updateProcessorsStatus();
-  setInterval(updateProcessorsStatus, 5000);
-  console.info("This instance is primary, service status check started");
-} else {
-  console.info("This instance is not primary, service status check not started");
-}
+updateProcessorsStatus();
+setInterval(updateProcessorsStatus, 5000);
