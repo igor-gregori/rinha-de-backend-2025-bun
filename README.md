@@ -21,7 +21,7 @@ A arquitetura consiste em duas instâncias da aplicação (`leader` e `follower`
 ### Diagrama da Arquitetura
 
 ```mermaid
-graph TD
+graph LR
     subgraph Cliente
         C[Requisições]
     end
@@ -57,6 +57,25 @@ graph TD
 
     Leader -- "3 - Pede Resumo do Follower" --> Follower
     Follower -- "4 - Retorna Resumo para Leader" --> Leader
+
+    %% STYLE DEFINITIONS
+    style C fill:#b7e4c7,stroke:#40916c,stroke-width:2px
+    style LB fill:#caf0f8,stroke:#0096c7,stroke-width:2px
+    style Leader fill:#ffe066,stroke:#ffb700,stroke-width:3px,color:#7b6000
+    style Follower fill:#e0aaff,stroke:#7209b7,stroke-width:3px,color:#3a0865
+    style Processors fill:#bdb2ff,stroke:#4361ee,stroke-width:2px
+    %% Subgraph borders
+    classDef subCliente fill:#d8f3dc,stroke:#52b788,stroke-width:2px
+    classDef subLoadBalancer fill:#d0f4ff,stroke:#48cae4,stroke-width:2px
+    classDef subLeader fill:#fff3bf,stroke:#f59e42,stroke-width:2px
+    classDef subFollower fill:#e6c7f7,stroke:#7209b7,stroke-width:2px
+    classDef subProcessors fill:#e3dffd,stroke:#4ea8de,stroke-width:2px
+    %% Assign classes to subgraphs (label node inside each subgraph)
+    class C subCliente;
+    class LB subLoadBalancer;
+    class Leader subLeader;
+    class Follower subFollower;
+    class Processors subProcessors;
 ```
 
 ### Decisões Estratégicas
