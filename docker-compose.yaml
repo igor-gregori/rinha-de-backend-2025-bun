@@ -1,7 +1,8 @@
 services:
   payment-proxy-leader:
-    build:
-      context: ./payment-proxy
+    image: igorgregori/payment-proxy:v1
+    # build:
+    #   context: ./payment-proxy
     hostname: payment-proxy-leader
     networks:
       - backend
@@ -23,8 +24,9 @@ services:
       - payment-proxy-follower
 
   payment-proxy-follower:
-    build:
-      context: ./payment-proxy
+    image: igorgregori/payment-proxy:v1
+    # build:
+    #   context: ./payment-proxy
     hostname: payment-proxy-follower
     networks:
       - backend
