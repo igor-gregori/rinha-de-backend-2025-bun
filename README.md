@@ -1,7 +1,5 @@
 # Rinha de Backend 2025 - Proxy de Pagamentos com Bun
 
-## Igor Gregori
-
 ### Tecnologias Utilizadas
 
 - **Linguagem:** TypeScript
