@@ -22,61 +22,41 @@ A arquitetura consiste em duas instâncias da aplicação (`leader` e `follower`
 
 ```mermaid
 graph TD
-    subgraph "Cliente"
-        C(Requisições)
+    subgraph Cliente
+        C[Requisições]
     end
 
-    subgraph "Infraestrutura"
-        LB(Nginx Load Balancer)
+    subgraph "Load Balancer"
+        LB[Nginx]
     end
 
-    subgraph "Instância Leader (api1)"
-        HL(HTTP Server)
-        WL(Worker Thread)
-        ML(Memória: Pagamentos Processados)
-        CS(Health Checker)
+    subgraph "Instância Leader"
+        Leader[api1: Leader]
     end
 
-    subgraph "Instância Follower (api2)"
-        HF(HTTP Server)
-        WF(Worker Thread)
-        MF(Memória: Pagamentos Processados)
+    subgraph "Instância Follower"
+        Follower[api2: Follower]
     end
 
-    subgraph "Processadores de Pagamento"
-        P_DEF(Default Processor)
-        P_FALL(Fallback Processor)
+    subgraph "Processadores Externos"
+        Processors(Processadores de Pagamento)
     end
 
     C -- "POST /payments" --> LB
-    LB -- "least_conn" --> HL
-    LB -- "least_conn" --> HF
-
     C -- "GET /payments-summary" --> LB
-    LB -- "Rota Específica" --> HL
 
-    HL -- "1. Adiciona na Fila" --> WL
-    HF -- "1. Adiciona na Fila" --> WF
+    LB -- "Balanceamento (least_conn)" --> Leader
+    LB -- "Balanceamento (least_conn)" --> Follower
+    LB -- "Rota Específica para /payments-summary" --> Leader
 
-    WL -- "3. Processa Pagamento" --> P_DEF
-    WL -- "3. Processa Pagamento" --> P_FALL
-    WF -- "3. Processa Pagamento" --> P_DEF
-    WF -- "3. Processa Pagamento" --> P_FALL
+    Leader -- "Processa Lote de Pagamentos" --> Processors
+    Follower -- "Processa Lote de Pagamentos" --> Processors
 
-    WL -- "4. Salva em Memória" --> ML
-    WF -- "4. Salva em Memória" --> MF
+    Leader -- "1 - Verifica Saúde dos Processadores" --> Processors
+    Leader -- "2 - Envia Status para Follower" --> Follower
 
-    CS -- "2. Verifica Saúde" --> P_DEF
-    CS -- "2. Verifica Saúde" --> P_FALL
-    CS -- "Envia Status" --> HL
-    HL -- "Broadcast Status (HTTP)" --> HF
-    HL -- "Envia Status" --> WL
-    HF -- "Envia Status" --> WF
-
-    HL -- "GET /internal/payments-summary" --> HF
-    HF -- "Pede Resumo" --> WF
-    WF -- "Retorna Resumo" --> HF
-    HF -- "Retorna Resumo" --> HL
+    Leader -- "3 - Pede Resumo do Follower" --> Follower
+    Follower -- "4 - Retorna Resumo para Leader" --> Leader
 ```
 
 ### Decisões Estratégicas
