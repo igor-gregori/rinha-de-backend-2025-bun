@@ -11,8 +11,8 @@ services:
       - PAYMENT_PROXY_FOLLOWER_URL=http://payment-proxy-follower:3000
       - PAYMENT_PROCESSOR_URL_DEFAULT=http://payment-processor-default:8080
       - PAYMENT_PROCESSOR_URL_FALLBACK=http://payment-processor-fallback:8080
-      - PROCESS_BATCH_INTERVAL=200
-      - MAX_BATCH_SIZE=50
+      - PROCESS_BATCH_INTERVAL=150
+      - MAX_BATCH_SIZE=100
       - CHECK_PROCESSORS_STATUS_INTERVAL=5010
     deploy:
       resources:
@@ -33,8 +33,8 @@ services:
       - INSTANCE_TYPE=FOLLOWER
       - PAYMENT_PROCESSOR_URL_DEFAULT=http://payment-processor-default:8080
       - PAYMENT_PROCESSOR_URL_FALLBACK=http://payment-processor-fallback:8080
-      - PROCESS_BATCH_INTERVAL=200
-      - MAX_BATCH_SIZE=50
+      - PROCESS_BATCH_INTERVAL=150
+      - MAX_BATCH_SIZE=100
       - CHECK_PROCESSORS_STATUS_INTERVAL=5010
     deploy:
       resources:
