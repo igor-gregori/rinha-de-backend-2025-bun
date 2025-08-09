@@ -1,5 +1,5 @@
 build:
-	docker compose build
+	docker compose build --no-cache
 
 up:
 	export WATCH_FILES=0 && docker compose up -d
