@@ -52,7 +52,7 @@ async function processBatch(): Promise<void> {
 
     const processorToUse = getProcessorToUse();
     if (!processorToUse) {
-      console.warn("Both processors are offline. Skipping batch processing.");
+      // console.warn("Both processors are offline. Skipping batch processing.");
       return;
     }
 
