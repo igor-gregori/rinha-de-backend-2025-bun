@@ -1,6 +1,6 @@
 services:
   payment-proxy-leader:
-    # image: igorgregori/payment-proxy:v1
+    # image: igorgregori/payment-proxy:v2
     build:
       context: ./payment-proxy
     hostname: payment-proxy-leader
@@ -12,19 +12,20 @@ services:
       - PAYMENT_PROXY_FOLLOWER_URL=http://payment-proxy-follower:3000
       - PAYMENT_PROCESSOR_URL_DEFAULT=http://payment-processor-default:8080
       - PAYMENT_PROCESSOR_URL_FALLBACK=http://payment-processor-fallback:8080
-      - PROCESS_BATCH_INTERVAL=150
-      - MAX_BATCH_SIZE=100
-      - CHECK_PROCESSORS_STATUS_INTERVAL=5005
+      - PROCESS_BATCH_INTERVAL=100
+      - MAX_BATCH_SIZE=50
+      - PERFORMANCE_THRESHOLD_PERCENTAGE=0.15
+      - CHECK_PROCESSORS_STATUS_INTERVAL=5001
     deploy:
       resources:
         limits:
-          cpus: "0.7"
+          cpus: "0.725"
           memory: "125MB"
     depends_on:
       - payment-proxy-follower
 
   payment-proxy-follower:
-    # image: igorgregori/payment-proxy:v1
+    # image: igorgregori/payment-proxy:v2
     build:
       context: ./payment-proxy
     hostname: payment-proxy-follower
@@ -35,13 +36,14 @@ services:
       - INSTANCE_TYPE=FOLLOWER
       - PAYMENT_PROCESSOR_URL_DEFAULT=http://payment-processor-default:8080
       - PAYMENT_PROCESSOR_URL_FALLBACK=http://payment-processor-fallback:8080
-      - PROCESS_BATCH_INTERVAL=150
-      - MAX_BATCH_SIZE=100
-      - CHECK_PROCESSORS_STATUS_INTERVAL=5005
+      - PROCESS_BATCH_INTERVAL=100
+      - MAX_BATCH_SIZE=50
+      - PERFORMANCE_THRESHOLD_PERCENTAGE=0.15
+      - CHECK_PROCESSORS_STATUS_INTERVAL=5001
     deploy:
       resources:
         limits:
-          cpus: "0.7"
+          cpus: "0.725"
           memory: "125MB"
 
   nginx:
@@ -55,7 +57,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.1"
+          cpus: "0.05"
           memory: "100MB"
     depends_on:
       - payment-proxy-leader
