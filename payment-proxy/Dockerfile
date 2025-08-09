@@ -2,12 +2,14 @@ FROM oven/bun:1.2.18-alpine
 
 WORKDIR /app
 
+ENV NODE_ENV=production
+
 COPY bun.lock package.json ./
 
-RUN bun install --production
+RUN bun install --ci --frozen-lockfile --production
 
 COPY . .
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "if [ \"$WATCH_FILES\" = \"1\" ]; then bun run dev; else bun run start; fi"]
+CMD ["bun","run","start"]
