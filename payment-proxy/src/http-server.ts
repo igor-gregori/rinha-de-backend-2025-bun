@@ -1,6 +1,7 @@
 import { type BunRequest } from "bun";
 import { checkProcessorsStatus } from "./services/processors-status-checker";
 
+// Worker
 const worker = new Worker(new URL("worker.ts", import.meta.url).href);
 
 worker.addEventListener("open", () => {
