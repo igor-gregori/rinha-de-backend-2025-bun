@@ -140,7 +140,6 @@ async function updateProcessorsStatus() {
     headers: {
       "Content-Type": "application/json",
     },
-    signal: AbortSignal.timeout(500),
   })
     .then((response) => {
       if (!response.ok) {
@@ -148,11 +147,7 @@ async function updateProcessorsStatus() {
       }
     })
     .catch((err) => {
-      if (err.name === "AbortError") {
-        console.warn("Request to follower timed out.");
-      } else {
-        console.warn("Failed to communicate with follower instance.");
-      }
+      console.warn("Failed to communicate with follower instance.", err);
     });
 }
 
