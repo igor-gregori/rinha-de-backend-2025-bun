@@ -11,6 +11,7 @@ import type {
 
 const PROCESS_BATCH_INTERVAL = Number(Bun.env.PROCESS_BATCH_INTERVAL);
 const MAX_BATCH_SIZE = Number(Bun.env.MAX_BATCH_SIZE);
+const PERFORMANCE_THRESHOLD_PERCENTAGE = Number(Bun.env.PERFORMANCE_THRESHOLD_PERCENTAGE);
 
 let processorsStatus = {
   default: {
@@ -85,8 +86,6 @@ function getProcessorToUse(): "default" | "fallback" | null {
   if (isDefaultViable && !isFallbackViable) {
     return "default";
   }
-
-  const PERFORMANCE_THRESHOLD_PERCENTAGE = 0.3; // 30%
 
   const defaultIsSignificantlySlower =
     defaultStatus.minResponseTime > fallbackStatus.minResponseTime * (1 + PERFORMANCE_THRESHOLD_PERCENTAGE);
