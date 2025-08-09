@@ -8,6 +8,8 @@ worker.addEventListener("open", () => {
   console.info("Worker is ready");
 });
 
+const paymentCreated = new Response(null, { status: 201 });
+
 // HTTP Server
 Bun.serve({
   port: 3000,
@@ -17,7 +19,7 @@ Bun.serve({
       POST: async (req: BunRequest) => {
         const paymentRequest = await req.json();
         worker.postMessage({ type: "CREATE-PAYMENT-REQUEST", payload: paymentRequest });
-        return new Response(null, { status: 201 });
+        return paymentCreated;
       },
     },
     "/payments-summary": {
